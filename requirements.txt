@@ -1,0 +1,17 @@
+# versão mínima para compatibilidade com streamlit-webrtc
+streamlit>=1.39.0,<2.0.0
+
+# componente WebRTC para Streamlit
+streamlit-webrtc>=0.48.1,<1.0.0
+
+# dependência de RTC
+aiortc>=1.11.0,<2.0.0
+
+# servidor ICE/STUN para negociação de rede
+aioice>=0.10.0,<1.0.0
+
+# manipulação de mídia (codec wrapper)
+av==14.4.0                         # roda o wheel pré-compilado para CPython 3.11 
+
+# para gerenciamento de dados dos pacientes
+pandas>=1.5.0,<3.0.0
