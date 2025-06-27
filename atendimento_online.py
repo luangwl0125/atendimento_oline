@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ==== Parte “somente vídeo” se houver ?room=xxx ====
-params = st.experimental_get_query_params()
+params = st.query_params  # substituído experimental_get_query_params
 room = params.get("room", [None])[0]
 
 if room:
@@ -30,6 +30,15 @@ if room:
         media_stream_constraints={"video": True, "audio": True}
     )
     st.stop()
+
+# ==== Funções de I/O e utilitárias ====
+def carregar_pacientes():
+    try:
+        if os.path.exists('pacientes.json'):
+            return json.load(open('pacientes.json', 'r', encoding='utf-8'))
+    except Exception as e:
+        st.error(f"Erro ao carregar pacientes: {e}")
+    return []
 
 # ==== Funções de I/O e utilitárias ====
 def carregar_pacientes():
