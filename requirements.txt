@@ -11,7 +11,7 @@ aiortc>=1.11.0,<2.0.0
 aioice>=0.10.0,<1.0.0
 
 # manipulação de mídia (codec wrapper)
-av==14.4.0                         # roda o wheel pré-compilado para CPython 3.11 
+av==14.4.0
 
 # para gerenciamento de dados dos pacientes
 pandas>=1.5.0,<3.0.0
