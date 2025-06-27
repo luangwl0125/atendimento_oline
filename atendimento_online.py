@@ -71,6 +71,7 @@ if st.sidebar.button("🔄 Recarregar Dados"):
     st.rerun()
 
 # Carrega e garante room_id permanente por paciente\pacientes = carregar_pacientes()
+pacientes = carregar_pacientes()
 updated = False
 for p in pacientes:
     if 'room_id' not in p:
