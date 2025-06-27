@@ -71,7 +71,7 @@ def salvar_sessoes(sessoes):
 st.title("🧠 Plataforma de Psicologia")
 page = st.sidebar.selectbox("Escolha uma opção:", ["Atendimento On-line", "Gerenciador de Pacientes"])
 if st.sidebar.button("🔄 Recarregar Dados"):
-    st.experimental_rerun()
+    st.rerun()
 
 # Carrega pacientes e garante room_id permanente
 pacientes = carregar_pacientes()
@@ -174,7 +174,7 @@ else:
                     'room_id': uuid.uuid4().hex[:8]
                 })
                 salvar_pacientes(pacientes)
-                st.experimental_rerun()
+                st.rerun()
     with tab2:
         st.subheader("Lista de Pacientes")
         for p in pacientes:
@@ -187,4 +187,4 @@ else:
                 st.write(s['observacoes'])
 
 st.divider()
-st.write("💻 Desenvolvido por Luan Gama")
+
