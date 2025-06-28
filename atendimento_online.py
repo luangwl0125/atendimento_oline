@@ -11,7 +11,7 @@ import uuid
 from urllib.parse import quote
 
 # URL pública do seu app (ajuste para seu domínio)
-BASE_URL = "https://oriapsi.streamlit.app/atendimento_online"
+BASE_URL = "https://oria-psi-atendimento-oline.streamlit.app"
 
 # Configuração única da página
 st.set_page_config(
@@ -23,11 +23,13 @@ st.set_page_config(
 # ==== Mode “cliente” se houver ?room=xxx ====
 params = st.query_params
 room = params.get("room", [None])[0]
+
 if room:
     st.title(f"🧠 Videochamada — Sala {room}")
-    rtc_cfg = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
+    rtc_cfg = RTCConfiguration({"iceServers":[{"urls":["stun:stun.l.google.com:19302"]}]})
     webrtc_streamer(
         key=f"webrtc_{room}",
+        mode="sendrecv",
         rtc_configuration=rtc_cfg,
         media_stream_constraints={"video": True, "audio": True}
     )
@@ -70,7 +72,7 @@ page = st.sidebar.selectbox("Escolha uma opção:", ["Atendimento On-line", "Ger
 if st.sidebar.button("🔄 Recarregar Dados"):
     st.rerun()
 
-# Carrega e garante room_id permanente por paciente\pacientes = carregar_pacientes()
+# Carrega e garante room_id permanente por paciente
 pacientes = carregar_pacientes()
 updated = False
 for p in pacientes:
@@ -92,8 +94,9 @@ if page == "Atendimento On-line":
         sel = st.selectbox("Selecione o paciente:", ["..."] + nomes)
         if sel != "...":
             p = next(x for x in pacientes if x['nome'] == sel)
-            # Link fixo de videochamada para esse paciente
+            # 1) Monte o link usando o BASE_URL e o room_id do paciente
             share_link = f"{BASE_URL}?room={p['room_id']}"
+            # 2) Exiba na tela para copiar ou enviar
             st.markdown(f"**Link da videochamada (copie e envie):** [{share_link}]({share_link})")
             
             # Dados do paciente
@@ -131,6 +134,7 @@ if page == "Atendimento On-line":
                 rtc = RTCConfiguration({"iceServers":[{"urls":["stun:stun.l.google.com:19302"]}]})
                 webrtc_streamer(
                     key=f"webrtc_{p['room_id']}",
+                    mode="sendrecv",
                     rtc_configuration=rtc,
                     media_stream_constraints={"video":True,"audio":True}
                 )
