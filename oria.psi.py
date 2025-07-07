@@ -187,25 +187,40 @@ def pagina_login():
                     else:
                         st.success("✅ Dados válidos! Clique em 'Cadastrar' para continuar.")
                 
-                # Botão de registro
-                if st.button("📝 Cadastrar", use_container_width=True):
-                    if nome_completo and crp_registro and senha_registro and senha_confirmacao:
-                        if validar_crp(crp_registro) and not verificar_usuario_existe(crp_registro) and senha_registro == senha_confirmacao and len(senha_registro) >= 6 and len(nome_completo) >= 3:
-                            if registrar_novo_usuario(nome_completo, crp_registro, senha_registro):
-                                st.success("✅ Cadastro realizado com sucesso!")
-                                st.info("Agora você pode fazer login na aba 'Login'.")
-                                # Limpar campos
-                                st.session_state.reg_nome = ""
-                                st.session_state.reg_crp = ""
-                                st.session_state.reg_senha = ""
-                                st.session_state.reg_senha_confirm = ""
-                                st.rerun()
+                # Verificar se já foi cadastrado com sucesso
+                cadastro_sucesso = st.session_state.get('cadastro_sucesso', False)
+                
+                if cadastro_sucesso:
+                    st.success("✅ Cadastro realizado com sucesso!")
+                    st.info("Agora você pode fazer login na aba 'Login'.")
+                    st.markdown("---")
+                    st.markdown("""
+                    **🎉 Parabéns! Seu cadastro foi realizado com sucesso.**
+                    
+                    **Próximos passos:**
+                    1. Clique na aba **"🔑 Login"** acima
+                    2. Digite seu **CRP** e **senha**
+                    3. Clique em **"🔑 Entrar"**
+                    4. Comece a usar a plataforma!
+                    """)
+                    
+                    # Botão para fazer novo cadastro
+                    if st.button("📝 Fazer Novo Cadastro", use_container_width=True):
+                        st.session_state.cadastro_sucesso = False
+                        st.rerun()
+                                    # Botão de registro
+                    if st.button("📝 Cadastrar", use_container_width=True):
+                        if nome_completo and crp_registro and senha_registro and senha_confirmacao:
+                            if validar_crp(crp_registro) and not verificar_usuario_existe(crp_registro) and senha_registro == senha_confirmacao and len(senha_registro) >= 6 and len(nome_completo) >= 3:
+                                if registrar_novo_usuario(nome_completo, crp_registro, senha_registro):
+                                    st.session_state.cadastro_sucesso = True
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Erro ao realizar cadastro!")
                             else:
-                                st.error("❌ Erro ao realizar cadastro!")
+                                st.error("❌ Verifique os dados informados!")
                         else:
-                            st.error("❌ Verifique os dados informados!")
-                    else:
-                        st.error("❌ Preencha todos os campos!")
+                            st.error("❌ Preencha todos os campos!")
                 
                 st.markdown("---")
                 st.info("""
@@ -228,6 +243,8 @@ if 'logado' not in st.session_state:
     st.session_state.logado = False
 if 'mostrar_termos' not in st.session_state:
     st.session_state.mostrar_termos = False
+if 'cadastro_sucesso' not in st.session_state:
+    st.session_state.cadastro_sucesso = False
 
 # ==== Verificação de Login ====
 if not st.session_state.logado:
