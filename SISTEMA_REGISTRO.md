@@ -16,14 +16,14 @@ O sistema foi atualizado para permitir que psicólogos façam seu próprio cadas
 ### 📝 Registro de Novos Usuários
 
 - **Nome Completo**: Campo obrigatório
-- **CRP**: Validação de formato XX/XXXXXX
+- **CRP**: Formato livre (mínimo 3 caracteres)
 - **Senha**: Mínimo 6 caracteres
 - **Confirmação**: Verificação de senha
 - **Validações**: Múltiplas verificações de dados
 
 ### 🔒 Validações de Segurança
 
-- **Formato CRP**: Regex para XX/XXXXXX
+- **CRP válido**: Mínimo 3 caracteres
 - **Senha forte**: Mínimo 6 caracteres
 - **CRP único**: Não permite duplicatas
 - **Dados obrigatórios**: Todos os campos preenchidos
@@ -46,8 +46,9 @@ Usuário acessa → Aba "Login" → CRP + Senha → Autenticação → Acesso
 
 ```python
 def validar_crp(crp):
-    pattern = r'^\d{2}/\d{6}$'
-    return bool(re.match(pattern, crp))
+    # Removida validação de formato específico
+    # Aceita qualquer formato de CRP
+    return len(crp.strip()) >= 3  # Mínimo 3 caracteres
 ```
 
 ### 4. **Verificação de Usuário**
@@ -87,7 +88,7 @@ def verificar_usuario_existe(crp):
 
 ### ✅ Validações Implementadas
 
-- **Formato CRP**: XX/XXXXXX (regex)
+- **CRP válido**: Mínimo 3 caracteres
 - **CRP único**: Não permite duplicatas
 - **Senha mínima**: 6 caracteres
 - **Confirmação**: Senhas devem coincidir
@@ -115,7 +116,7 @@ def verificar_usuario_existe(crp):
 2. **Clique** na aba "📝 Primeiro Acesso"
 3. **Preencha** todos os campos:
    - Nome Completo
-   - CRP (formato: XX/XXXXXX)
+   - CRP (mínimo 3 caracteres)
    - Senha (mínimo 6 caracteres)
    - Confirmar Senha
 4. **Clique** em "📝 Cadastrar"
@@ -130,8 +131,8 @@ def verificar_usuario_existe(crp):
 
 ### Exemplos de Dados
 
-- **CRP válido**: 06/123456, 12/789012, 01/345678
-- **CRP inválido**: 6/123456, 06/12345, 06-123456
+- **CRP válido**: 06/123456, 12/789012, 01/345678, CRP123, 06-123456
+- **CRP inválido**: 12, ab, (vazio)
 - **Senha válida**: senha123, minhaSenha, 123456
 - **Senha inválida**: 123, abc, (vazia)
 
@@ -149,8 +150,8 @@ def verificar_usuario_existe(crp):
 
 ### `validar_crp(crp)`
 
-- Valida formato XX/XXXXXX
-- Usa regex para verificação
+- Valida CRP com mínimo 3 caracteres
+- Aceita qualquer formato
 
 ### `verificar_usuario_existe(crp)`
 
@@ -208,14 +209,14 @@ def verificar_usuario_existe(crp):
 
 ### Problemas Comuns
 
-1. **CRP inválido**: Verifique formato XX/XXXXXX
+1. **CRP inválido**: Digite pelo menos 3 caracteres
 2. **CRP já cadastrado**: Use aba de login
 3. **Senha fraca**: Mínimo 6 caracteres
 4. **Senhas diferentes**: Confirme corretamente
 
 ### Validações
 
-- **Formato CRP**: `^\d{2}/\d{6}$`
+- **CRP mínimo**: 3 caracteres
 - **Senha mínima**: 6 caracteres
 - **Nome mínimo**: 3 caracteres
 - **Campos obrigatórios**: Todos preenchidos
