@@ -296,7 +296,7 @@ else:
         if pacientes:
             busca=st.text_input("🔍 Buscar paciente:")
             filtrados=[p for p in pacientes if busca.lower() in p['nome'].lower()] if busca else pacientes
-            for p in filtrados:
+            for i, p in enumerate(filtrados):
                 with st.expander(f"👤 {p['nome']} - {p['idade']} anos"):
                     col1,col2=st.columns(2)
                     with col1:
@@ -306,7 +306,7 @@ else:
                     with col2:
                         st.write(f"🏠 {p.get('endereco','–')}")
                         st.write(f"👤 {p.get('responsavel','–')}")
-                    if st.button("🗑️ Excluir",key=f"del_{p['id']}"):
+                    if st.button("🗑️ Excluir",key=f"del_{p['id']}_{i}"):
                         pacientes.remove(p)
                         salvar_pacientes(pacientes)
                         st.success("Paciente removido!")
