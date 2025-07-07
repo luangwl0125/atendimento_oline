@@ -3,3 +3,5 @@ streamlit>=1.28.0
 
 # para gerenciamento de dados dos pacientes
 pandas>=2.0.0
+
+openpyxl
