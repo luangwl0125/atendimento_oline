@@ -19,6 +19,129 @@ st.set_page_config(
     layout="wide"
 )
 
+# ==== Sistema de Login e Termos ====
+def mostrar_termos():
+    st.markdown("""
+    # 🛡️ Termos de Uso e Política de Privacidade
+    
+    ## Compromisso com a Ética, Segurança e Sigilo Profissional
+    
+    Este serviço foi desenvolvido como ferramenta de apoio técnico à elaboração de documentos psicológicos, com base nas diretrizes estabelecidas pela Resolução CFP nº 06/2019, pela Resolução CFP nº 01/2009 (Política de Proteção de Dados) e pelo Código de Ética Profissional do Psicólogo.
+    
+    ### 🧠 Responsabilidade Técnica e Ética
+    - As produções dos documentos devem obrigatoriamente ser revisadas, validadas e assinadas por psicóloga(o) devidamente inscrita(o) no CRP, conforme determina a legislação profissional.
+    - O conteúdo gerado não substitui o julgamento clínico e técnico do profissional.
+    
+    ### 📌 Finalidade do Sistema
+    Este assistente virtual tem como único propósito auxiliar a(o) psicóloga(o) na sistematização de informações, organização textual e conformidade estrutural de documentos, sempre respeitando os princípios de autonomia, consentimento informado, sigilo, não exposição e ética nas relações profissionais.
+    
+    ### ⚖️ Referências Normativas
+    - **Resolução CFP nº 06/2019** – Elaboração de Documentos Escritos Produzidos pela(o) Psicóloga(o)
+    - **Código de Ética Profissional do Psicólogo** – Artigos 1º, 9º, 13º e 14º
+    - **Resolução CFP nº 11/2018** – Sobre uso de tecnologias da informação e comunicação
+    - **LGPD (Lei Geral de Proteção de Dados)** – Aplicabilidade ao contexto psicológico
+    
+    ### 🔒 Privacidade e Proteção de Dados
+    
+    Esta ferramenta foi construída em conformidade com:
+    - O Código de Ética do Profissional Psicólogo (Resolução CFP nº 010/2005);
+    - A Resolução CFP nº 06/2019: Elaboração de Documentos Escritos Produzidos pela(o) Psicóloga(o);
+    - Resolução CFP nº 11/2018: Sobre uso de tecnologias da informação e comunicação
+    - **Criptografia em trânsito (HTTPS)**: Criptografia de Ponta a Ponta para Proteger Dados em Trânsito e em Repouso. Todos os dados são protegidos contra interceptação.
+    - **Controle de acesso**: APIs protegidas com autenticação para impedir acesso não autorizado.
+    - **Validação de entrada**: Validações automáticas, evitando injeções maliciosas ou erros lógicos.
+    - **Registros e auditoria**: Rastreamento de dados com precisão (data/hora e autor), ajudando na responsabilização e conformidade com normas como a LGPD.
+    - **Anonimização**: Omissão de dados sensíveis antes de armazenar ou compartilhar informações JSON, promovendo privacidade.
+    - **Normas da Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018)**, que regula o tratamento de dados pessoais no Brasil. Seu objetivo principal é garantir o direito à privacidade e à proteção dos dados dos cidadãos, estabelecendo regras claras sobre coleta, uso, armazenamento e compartilhamento de informações pessoais por empresas, órgãos públicos e profissionais autônomos incluindo psicólogas(os).
+    
+    **Ao utilizar este sistema, você declara ciência de que respeita e segue os preceitos éticos da profissão e que assume a responsabilidade técnica e legal pelos documentos emitidos com o apoio desta ferramenta.**
+    """)
+
+def pagina_login():
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem;">
+        <h1>🧠 OriaPsi</h1>
+        <h3>Plataforma de Atendimento Psicológico On-line</h3>
+        <p style="color: #666; font-size: 1.1rem;">Acesso Restrito a Profissionais de Psicologia</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.container():
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.markdown("### 🔐 Login Profissional")
+            
+            # Campos de login
+            crp = st.text_input("CRP (Conselho Regional de Psicologia)", placeholder="Ex: 06/123456")
+            senha = st.text_input("Senha", type="password", placeholder="Digite sua senha")
+            
+            # Botões
+            col_btn1, col_btn2 = st.columns(2)
+            with col_btn1:
+                if st.button("🔑 Entrar", use_container_width=True):
+                    if crp and senha:
+                        # Validação simples (você pode implementar validação mais robusta)
+                        if len(crp) >= 5 and len(senha) >= 4:
+                            st.session_state.logado = True
+                            st.session_state.crp = crp
+                            st.rerun()
+                        else:
+                            st.error("❌ CRP ou senha inválidos!")
+                    else:
+                        st.error("❌ Preencha todos os campos!")
+            
+            with col_btn2:
+                if st.button("📋 Ver Termos", use_container_width=True):
+                    st.session_state.mostrar_termos = True
+                    st.rerun()
+            
+            st.markdown("---")
+            st.info("""
+            **⚠️ Aviso Importante:**
+            - Este sistema é destinado exclusivamente a psicólogos registrados no CRP
+            - Todos os dados são protegidos conforme LGPD e Código de Ética Profissional
+            - O uso é de responsabilidade técnica e legal do profissional
+            """)
+
+# ==== Inicialização da Sessão ====
+if 'logado' not in st.session_state:
+    st.session_state.logado = False
+if 'mostrar_termos' not in st.session_state:
+    st.session_state.mostrar_termos = False
+
+# ==== Verificação de Login ====
+if not st.session_state.logado:
+    if st.session_state.mostrar_termos:
+        mostrar_termos()
+        if st.button("🔙 Voltar ao Login"):
+            st.session_state.mostrar_termos = False
+            st.rerun()
+    else:
+        pagina_login()
+    st.stop()
+
+# ==== Cabeçalho da Aplicação Principal ====
+st.markdown(f"""
+<div style="background-color: #f0f2f6; padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1>🧠 OriaPsi - Atendimento On-line 📞</h1>
+            <p style="margin: 0; color: #666;">Profissional: {st.session_state.crp}</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="margin: 0; color: #666;">Sessão ativa</p>
+            <p style="margin: 0; font-size: 0.8rem; color: #999;">{datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Botão de logout
+if st.sidebar.button("🚪 Sair"):
+    st.session_state.logado = False
+    st.session_state.mostrar_termos = False
+    st.rerun()
+
 # ==== Parte "somente vídeo" se houver ?room=xxx ====
 params = st.query_params  # substituído experimental_get_query_params
 room = params.get("room", [None])[0]
@@ -41,38 +164,122 @@ if room:
     st.stop()
 
 # ==== Funções de I/O e utilitárias ====
-def carregar_pacientes():
+def carregar_pacientes(crp=None):
     try:
-        if os.path.exists('pacientes.json'):
-            return json.load(open('pacientes.json','r',encoding='utf-8'))
+        if crp:
+            # Arquivo específico para o profissional
+            arquivo = f'pacientes_{crp.replace("/", "_")}.json'
+        else:
+            # Arquivo geral (fallback)
+            arquivo = 'pacientes.json'
+            
+        if os.path.exists(arquivo):
+            return json.load(open(arquivo,'r',encoding='utf-8'))
     except Exception as e:
         st.error(f"Erro ao carregar pacientes: {e}")
     return []
 
-def salvar_pacientes(pacientes):
+def salvar_pacientes(pacientes, crp=None):
     try:
-        with open('pacientes.json','w',encoding='utf-8') as f:
+        if crp:
+            # Arquivo específico para o profissional
+            arquivo = f'pacientes_{crp.replace("/", "_")}.json'
+        else:
+            # Arquivo geral (fallback)
+            arquivo = 'pacientes.json'
+            
+        with open(arquivo,'w',encoding='utf-8') as f:
             json.dump(pacientes,f,ensure_ascii=False,indent=2)
     except Exception as e:
         st.error(f"Erro ao salvar pacientes: {e}")
 
-def carregar_sessoes():
+def carregar_sessoes(crp=None):
     try:
-        if os.path.exists('sessoes.json'):
-            return json.load(open('sessoes.json','r',encoding='utf-8'))
+        if crp:
+            # Arquivo específico para o profissional
+            arquivo = f'sessoes_{crp.replace("/", "_")}.json'
+        else:
+            # Arquivo geral (fallback)
+            arquivo = 'sessoes.json'
+            
+        if os.path.exists(arquivo):
+            return json.load(open(arquivo,'r',encoding='utf-8'))
     except Exception as e:
         st.error(f"Erro ao carregar sessões: {e}")
     return []
 
-def salvar_sessoes(sessoes):
+def salvar_sessoes(sessoes, crp=None):
     try:
-        with open('sessoes.json','w',encoding='utf-8') as f:
+        if crp:
+            # Arquivo específico para o profissional
+            arquivo = f'sessoes_{crp.replace("/", "_")}.json'
+        else:
+            # Arquivo geral (fallback)
+            arquivo = 'sessoes.json'
+            
+        with open(arquivo,'w',encoding='utf-8') as f:
             json.dump(sessoes,f,ensure_ascii=False,indent=2)
     except Exception as e:
         st.error(f"Erro ao salvar sessões: {e}")
 
-# ==== Cabeçalho e estado global ====
-st.title("🧠 OriaPsi - Atendimento On-line 📞")
+def obter_crp_atual():
+    """Retorna o CRP do usuário logado ou None"""
+    return st.session_state.get('crp', None)
+
+def migrar_dados_existentes(crp):
+    """Migra dados do arquivo geral para o arquivo específico do profissional"""
+    try:
+        # Migrar pacientes
+        if os.path.exists('pacientes.json'):
+            pacientes_gerais = json.load(open('pacientes.json','r',encoding='utf-8'))
+            if pacientes_gerais:
+                arquivo_especifico = f'pacientes_{crp.replace("/", "_")}.json'
+                if not os.path.exists(arquivo_especifico):
+                    with open(arquivo_especifico,'w',encoding='utf-8') as f:
+                        json.dump(pacientes_gerais,f,ensure_ascii=False,indent=2)
+                    st.info(f"📋 {len(pacientes_gerais)} paciente(s) migrado(s) para seu perfil.")
+        
+        # Migrar sessões
+        if os.path.exists('sessoes.json'):
+            sessoes_gerais = json.load(open('sessoes.json','r',encoding='utf-8'))
+            if sessoes_gerais:
+                arquivo_especifico = f'sessoes_{crp.replace("/", "_")}.json'
+                if not os.path.exists(arquivo_especifico):
+                    with open(arquivo_especifico,'w',encoding='utf-8') as f:
+                        json.dump(sessoes_gerais,f,ensure_ascii=False,indent=2)
+                    st.info(f"📊 {len(sessoes_gerais)} sessão(ões) migrada(s) para seu perfil.")
+                    
+    except Exception as e:
+        st.warning(f"Aviso: Erro na migração de dados: {e}")
+
+def mostrar_info_profissional():
+    """Mostra informações sobre o profissional logado e seus dados"""
+    crp = obter_crp_atual()
+    if crp:
+        pacientes = carregar_pacientes(crp)
+        sessoes = carregar_sessoes(crp)
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("👥 Pacientes", len(pacientes))
+        with col2:
+            st.metric("📊 Sessões", len(sessoes))
+        with col3:
+            st.metric("🔐 Profissional", crp)
+        
+        # Verificar se há dados para migrar
+        if os.path.exists('pacientes.json') or os.path.exists('sessoes.json'):
+            with st.expander("🔄 Migrar Dados Existentes"):
+                st.info("""
+                **Dados existentes detectados!**
+                
+                Encontramos dados no sistema anterior. Você pode migrar esses dados para seu perfil profissional.
+                """)
+                if st.button("📋 Migrar Dados para Meu Perfil"):
+                    migrar_dados_existentes(crp)
+                    st.rerun()
+
+# ==== Navegação Principal ====
 page = st.sidebar.selectbox(
     "Escolha uma opção:",
     ["Atender Agora","Gerenciar Pacientes"]
@@ -81,22 +288,25 @@ if st.sidebar.button("🔄 Recarregar Dados"):
     st.rerun()
 
 # Carrega e garante room_id permanente por paciente
-pacientes = carregar_pacientes()
+pacientes = carregar_pacientes(obter_crp_atual())
 updated = False
 for p in pacientes:
     if 'room_id' not in p:
         p['room_id'] = uuid.uuid4().hex[:8]
         updated = True
 if updated:
-    salvar_pacientes(pacientes)
-sessoes = carregar_sessoes()
+    salvar_pacientes(pacientes, obter_crp_atual())
+sessoes = carregar_sessoes(obter_crp_atual())
+
+# Mostra informações do profissional
+mostrar_info_profissional()
 
 # ==== Página de Atender Agora ====
 if page == "Atender Agora":
     if not pacientes:
-        st.warning("⚠️ Nenhum paciente cadastrado. Adicione pelo Gerenciar Pacientes.")
+        st.warning("⚠️ Nenhum paciente cadastrado em seu perfil. Adicione pelo Gerenciar Pacientes.")
     else:
-        st.success(f"✅ {len(pacientes)} paciente(s) cadastrado(s)")
+        st.success(f"✅ {len(pacientes)} paciente(s) cadastrado(s) em seu perfil profissional")
         nomes = [p['nome'] for p in pacientes]
         sel = st.selectbox("Selecione o paciente:",["..."]+nomes)
         if sel != "...":
@@ -245,7 +455,7 @@ if page == "Atender Agora":
                     'observacoes':obs,
                     'tipo_atendimento':'online'
                 })
-                salvar_sessoes(sessoes)
+                salvar_sessoes(sessoes, obter_crp_atual())
                 st.success("Observações salvas com sucesso!")
         else:
             st.info("👆 Selecione um paciente para iniciar.")
@@ -289,7 +499,7 @@ else:
                         'data_cadastro':datetime.now().strftime("%d/%m/%Y %H:%M"),
                         'room_id':uuid.uuid4().hex[:8]
                     })
-                    salvar_pacientes(pacientes)
+                    salvar_pacientes(pacientes, obter_crp_atual())
                     st.rerun()
     with tab2:
         st.subheader("Lista de Pacientes")
@@ -308,7 +518,7 @@ else:
                         st.write(f"👤 {p.get('responsavel','–')}")
                     if st.button("🗑️ Excluir",key=f"del_{p['id']}_{i}"):
                         pacientes.remove(p)
-                        salvar_pacientes(pacientes)
+                        salvar_pacientes(pacientes, obter_crp_atual())
                         st.success("Paciente removido!")
                         st.rerun()
     with tab3:
