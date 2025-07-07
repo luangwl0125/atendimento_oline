@@ -57,6 +57,59 @@ def mostrar_termos():
     **Ao utilizar este sistema, você declara ciência de que respeita e segue os preceitos éticos da profissão e que assume a responsabilidade técnica e legal pelos documentos emitidos com o apoio desta ferramenta.**
     """)
 
+def carregar_usuarios():
+    """Carrega lista de usuários registrados"""
+    try:
+        if os.path.exists('usuarios.json'):
+            return json.load(open('usuarios.json','r',encoding='utf-8'))
+    except Exception as e:
+        st.error(f"Erro ao carregar usuários: {e}")
+    return []
+
+def salvar_usuarios(usuarios):
+    """Salva lista de usuários"""
+    try:
+        with open('usuarios.json','w',encoding='utf-8') as f:
+            json.dump(usuarios,f,ensure_ascii=False,indent=2)
+    except Exception as e:
+        st.error(f"Erro ao salvar usuários: {e}")
+
+def validar_crp(crp):
+    """Valida formato do CRP"""
+    import re
+    # Formato: XX/XXXXXX (2 dígitos, barra, 6 dígitos)
+    pattern = r'^\d{2}/\d{6}$'
+    return bool(re.match(pattern, crp))
+
+def verificar_usuario_existe(crp):
+    """Verifica se usuário já existe"""
+    usuarios = carregar_usuarios()
+    return any(u['crp'] == crp for u in usuarios)
+
+def registrar_novo_usuario(nome, crp, senha):
+    """Registra novo usuário no sistema"""
+    usuarios = carregar_usuarios()
+    
+    novo_usuario = {
+        'nome': nome,
+        'crp': crp,
+        'senha': senha,  # Em produção, usar hash da senha
+        'data_cadastro': datetime.now().strftime("%d/%m/%Y %H:%M"),
+        'ativo': True
+    }
+    
+    usuarios.append(novo_usuario)
+    salvar_usuarios(usuarios)
+    return True
+
+def autenticar_usuario(crp, senha):
+    """Autentica usuário existente"""
+    usuarios = carregar_usuarios()
+    for usuario in usuarios:
+        if usuario['crp'] == crp and usuario['senha'] == senha and usuario['ativo']:
+            return usuario
+    return None
+
 def pagina_login():
     st.markdown("""
     <div style="text-align: center; padding: 2rem;">
@@ -66,42 +119,110 @@ def pagina_login():
     </div>
     """, unsafe_allow_html=True)
     
-    with st.container():
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.markdown("### 🔐 Login Profissional")
-            
-            # Campos de login
-            crp = st.text_input("CRP (Conselho Regional de Psicologia)", placeholder="Ex: 06/123456")
-            senha = st.text_input("Senha", type="password", placeholder="Digite sua senha")
-            
-            # Botões
-            col_btn1, col_btn2 = st.columns(2)
-            with col_btn1:
+    # Tabs para Login e Registro
+    tab1, tab2 = st.tabs(["🔑 Login", "📝 Primeiro Acesso"])
+    
+    with tab1:
+        with st.container():
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                st.markdown("### 🔐 Login Profissional")
+                
+                # Campos de login
+                crp_login = st.text_input("CRP (Ex: 06/123456)", placeholder="06/123456", key="login_crp")
+                senha_login = st.text_input("Senha", type="password", placeholder="Digite sua senha", key="login_senha")
+                
+                # Botão de login
                 if st.button("🔑 Entrar", use_container_width=True):
-                    if crp and senha:
-                        # Validação simples (você pode implementar validação mais robusta)
-                        if len(crp) >= 5 and len(senha) >= 4:
-                            st.session_state.logado = True
-                            st.session_state.crp = crp
-                            st.rerun()
+                    if crp_login and senha_login:
+                        if validar_crp(crp_login):
+                            usuario = autenticar_usuario(crp_login, senha_login)
+                            if usuario:
+                                st.session_state.logado = True
+                                st.session_state.crp = crp_login
+                                st.session_state.nome_usuario = usuario['nome']
+                                st.rerun()
+                            else:
+                                st.error("❌ CRP ou senha incorretos!")
                         else:
-                            st.error("❌ CRP ou senha inválidos!")
+                            st.error("❌ Formato de CRP inválido! Use: XX/XXXXXX")
                     else:
                         st.error("❌ Preencha todos os campos!")
-            
-            with col_btn2:
-                if st.button("📋 Ver Termos", use_container_width=True):
-                    st.session_state.mostrar_termos = True
-                    st.rerun()
-            
-            st.markdown("---")
-            st.info("""
-            **⚠️ Aviso Importante:**
-            - Este sistema é destinado exclusivamente a psicólogos registrados no CRP
-            - Todos os dados são protegidos conforme LGPD e Código de Ética Profissional
-            - O uso é de responsabilidade técnica e legal do profissional
-            """)
+                
+                st.markdown("---")
+                st.info("""
+                **⚠️ Aviso Importante:**
+                - Este sistema é destinado exclusivamente a psicólogos registrados no CRP
+                - Todos os dados são protegidos conforme LGPD e Código de Ética Profissional
+                - O uso é de responsabilidade técnica e legal do profissional
+                """)
+    
+    with tab2:
+        with st.container():
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                st.markdown("### 📝 Primeiro Acesso - Cadastro")
+                st.info("""
+                **Novo no sistema?**
+                Faça seu cadastro como profissional de psicologia.
+                """)
+                
+                # Campos de registro
+                nome_completo = st.text_input("Nome Completo", placeholder="Digite seu nome completo", key="reg_nome")
+                crp_registro = st.text_input("CRP (Ex: 06/123456)", placeholder="06/123456", key="reg_crp")
+                senha_registro = st.text_input("Senha", type="password", placeholder="Crie uma senha", key="reg_senha")
+                senha_confirmacao = st.text_input("Confirmar Senha", type="password", placeholder="Confirme sua senha", key="reg_senha_confirm")
+                
+                # Validações
+                if nome_completo and crp_registro and senha_registro and senha_confirmacao:
+                    if not validar_crp(crp_registro):
+                        st.error("❌ Formato de CRP inválido! Use: XX/XXXXXX")
+                    elif verificar_usuario_existe(crp_registro):
+                        st.error("❌ CRP já cadastrado! Use a aba de login.")
+                    elif senha_registro != senha_confirmacao:
+                        st.error("❌ Senhas não coincidem!")
+                    elif len(senha_registro) < 6:
+                        st.error("❌ Senha deve ter pelo menos 6 caracteres!")
+                    elif len(nome_completo) < 3:
+                        st.error("❌ Nome deve ter pelo menos 3 caracteres!")
+                    else:
+                        st.success("✅ Dados válidos! Clique em 'Cadastrar' para continuar.")
+                
+                # Botão de registro
+                if st.button("📝 Cadastrar", use_container_width=True):
+                    if nome_completo and crp_registro and senha_registro and senha_confirmacao:
+                        if validar_crp(crp_registro) and not verificar_usuario_existe(crp_registro) and senha_registro == senha_confirmacao and len(senha_registro) >= 6 and len(nome_completo) >= 3:
+                            if registrar_novo_usuario(nome_completo, crp_registro, senha_registro):
+                                st.success("✅ Cadastro realizado com sucesso!")
+                                st.info("Agora você pode fazer login na aba 'Login'.")
+                                # Limpar campos
+                                st.session_state.reg_nome = ""
+                                st.session_state.reg_crp = ""
+                                st.session_state.reg_senha = ""
+                                st.session_state.reg_senha_confirm = ""
+                                st.rerun()
+                            else:
+                                st.error("❌ Erro ao realizar cadastro!")
+                        else:
+                            st.error("❌ Verifique os dados informados!")
+                    else:
+                        st.error("❌ Preencha todos os campos!")
+                
+                st.markdown("---")
+                st.info("""
+                **📋 Informações do Cadastro:**
+                - CRP deve estar no formato XX/XXXXXX
+                - Senha deve ter pelo menos 6 caracteres
+                - Nome completo é obrigatório
+                - Cada CRP pode ter apenas uma conta
+                """)
+    
+    # Botão para ver termos (disponível em ambas as abas)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("📋 Ver Termos de Uso", use_container_width=True):
+            st.session_state.mostrar_termos = True
+            st.rerun()
 
 # ==== Inicialização da Sessão ====
 if 'logado' not in st.session_state:
@@ -121,12 +242,13 @@ if not st.session_state.logado:
     st.stop()
 
 # ==== Cabeçalho da Aplicação Principal ====
+nome_usuario = st.session_state.get('nome_usuario', 'Profissional')
 st.markdown(f"""
 <div style="background-color: #f0f2f6; padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h1>🧠 OriaPsi - Atendimento On-line 📞</h1>
-            <p style="margin: 0; color: #666;">Profissional: {st.session_state.crp}</p>
+            <p style="margin: 0; color: #666;">Profissional: {nome_usuario} ({st.session_state.crp})</p>
         </div>
         <div style="text-align: right;">
             <p style="margin: 0; color: #666;">Sessão ativa</p>
