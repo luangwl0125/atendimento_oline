@@ -8,6 +8,7 @@ from datetime import datetime, date
 import json
 import uuid
 from urllib.parse import quote
+import io
 
 # URL pública do seu app (ajuste para seu domínio)
 BASE_URL = "https://oria-psi-atendimento-oline.streamlit.app"
@@ -400,6 +401,14 @@ def gerar_planilha_modelo():
     ])
     return df
 
+def gerar_planilha_modelo_bytes():
+    df = gerar_planilha_modelo()
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+    output.seek(0)
+    return output.getvalue()
+
 def mostrar_info_profissional():
     """Mostra informações sobre o profissional logado e seus dados"""
     crp = obter_crp_atual()
@@ -421,7 +430,7 @@ def mostrar_info_profissional():
             modelo = gerar_planilha_modelo()
             st.download_button(
                 label="📄 Baixar Planilha Modelo",
-                data=modelo.to_excel(index=False, engine='openpyxl'),
+                data=gerar_planilha_modelo_bytes(),
                 file_name="modelo_pacientes.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
