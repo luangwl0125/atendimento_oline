@@ -1,0 +1,18 @@
+[
+    {
+        "nome": "Dr. João Silva Santos",
+        "crp": "06/123456",
+        "senha": "senha123",
+        "email": "joao.silva@exemplo.com",
+        "ativo": true,
+        "data_cadastro": "2024-01-01 10:00"
+    },
+    {
+        "nome": "Dra. Maria Santos Oliveira",
+        "crp": "06/789012",
+        "senha": "senha456",
+        "email": "maria.santos@exemplo.com",
+        "ativo": true,
+        "data_cadastro": "2024-01-01 11:00"
+    }
+]
