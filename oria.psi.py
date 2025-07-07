@@ -256,7 +256,7 @@ st.markdown(f"""
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h1>🧠 OriaPsi - Atendimento On-line 📞</h1>
-            <p style="margin: 0; color: #666;">Profissional: {nome_usuario} ({st.session_state.crp})</p>
+            <p style="margin: 0; color: #666;">Profissional: {nome_usuario} (CRP {st.session_state.crp})</p>
         </div>
         <div style="text-align: right;">
             <p style="margin: 0; color: #666;">Sessão ativa</p>
@@ -356,32 +356,6 @@ def obter_crp_atual():
     """Retorna o CRP do usuário logado ou None"""
     return st.session_state.get('crp', None)
 
-def migrar_dados_existentes(crp):
-    """Migra dados do arquivo geral para o arquivo específico do profissional"""
-    try:
-        # Migrar pacientes
-        if os.path.exists('pacientes.json'):
-            pacientes_gerais = json.load(open('pacientes.json','r',encoding='utf-8'))
-            if pacientes_gerais:
-                arquivo_especifico = f'pacientes_{crp.replace("/", "_")}.json'
-                if not os.path.exists(arquivo_especifico):
-                    with open(arquivo_especifico,'w',encoding='utf-8') as f:
-                        json.dump(pacientes_gerais,f,ensure_ascii=False,indent=2)
-                    st.info(f"📋 {len(pacientes_gerais)} paciente(s) migrado(s) para seu perfil.")
-        
-        # Migrar sessões
-        if os.path.exists('sessoes.json'):
-            sessoes_gerais = json.load(open('sessoes.json','r',encoding='utf-8'))
-            if sessoes_gerais:
-                arquivo_especifico = f'sessoes_{crp.replace("/", "_")}.json'
-                if not os.path.exists(arquivo_especifico):
-                    with open(arquivo_especifico,'w',encoding='utf-8') as f:
-                        json.dump(sessoes_gerais,f,ensure_ascii=False,indent=2)
-                    st.info(f"📊 {len(sessoes_gerais)} sessão(ões) migrada(s) para seu perfil.")
-                    
-    except Exception as e:
-        st.warning(f"Aviso: Erro na migração de dados: {e}")
-
 def gerar_planilha_modelo():
     df = pd.DataFrame([
         {
@@ -455,18 +429,6 @@ def mostrar_info_profissional():
                         st.error("A planilha não possui todos os campos necessários. Baixe o modelo para referência.")
                 except Exception as e:
                     st.error(f"Erro ao importar planilha: {e}")
-        
-        # Verificar se há dados para migrar
-        if os.path.exists('pacientes.json') or os.path.exists('sessoes.json'):
-            with st.expander("🔄 Migrar Dados Existentes"):
-                st.info("""
-                **Dados existentes detectados!**
-                
-                Encontramos dados no sistema anterior. Você pode migrar esses dados para seu perfil profissional.
-                """)
-                if st.button("📋 Migrar Dados para Meu Perfil"):
-                    migrar_dados_existentes(crp)
-                    st.rerun()
 
 # ==== Navegação Principal ====
 page = st.sidebar.selectbox(
@@ -500,10 +462,7 @@ if page == "Atender Agora":
         sel = st.selectbox("Selecione o paciente:",["..."]+nomes)
         if sel != "...":
             p = next(x for x in pacientes if x['nome']==sel)
-            # Link de videochamada (mantido para compatibilidade)
             share_link = f"{BASE_URL}?room={p['room_id']}"
-            
-            # Instruções para videochamada
             with st.expander("📋 Instruções para Videochamada"):
                 st.markdown(f"""
                 **Opções de Videochamada Disponíveis:**
@@ -511,17 +470,6 @@ if page == "Atender Agora":
                 ### 📱 WhatsApp
                 - **Enviar link**: Envia o link da plataforma via WhatsApp
                 - **WhatsApp Video**: Inicia videochamada direta pelo WhatsApp
-                
-                ### 🎥 Google Meet
-                - **Mais confiável** e gratuito
-                - Funciona em qualquer dispositivo
-                - Não precisa de conta Google
-                - Clique em "Criar Google Meet" e envie o link
-                
-                ### 🎥 Zoom
-                - **Interface familiar** para muitos usuários
-                - Funciona em desktop e mobile
-                - Clique em "Criar Zoom" e envie o link
                 
                 ### 🎥 Jitsi Meet
                 - **Totalmente gratuito** e de código aberto
@@ -531,42 +479,17 @@ if page == "Atender Agora":
                 - Clique em "Criar Jitsi Meet" e envie o link
                 
                 **Como usar:**
-                1. **Escolha uma plataforma** (Jitsi Meet ou Google Meet recomendados)
+                1. **Escolha uma plataforma** (Jitsi Meet recomendado)
                 2. **Clique em criar** a videochamada
                 3. **Envie o link** via WhatsApp para o paciente
                 4. **Ambos acessem** o link para iniciar a videochamada
                 
                 **Dicas:**
                 - **Jitsi Meet** é ideal para privacidade e simplicidade
-                - **Google Meet** é a opção mais confiável
                 - **WhatsApp Video** é ideal para atendimentos rápidos
-                - **Zoom** é familiar para usuários experientes
                 """)
-
-            # Informações do paciente
-            col1,col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
-                st.subheader("📋 Informações do Paciente")
-                st.write(f"**Nome:** {p['nome']}")
-                st.write(f"**Idade:** {p['idade']} anos")
-                st.write(f"**Data de Nascimento:** {p.get('data_nascimento','Não informado')}")
-                st.write(f"**Telefone:** {p.get('telefone','Não informado')}")
-                st.write(f"**E-mail:** {p.get('email','Não informado')}")
-                st.write(f"**Endereço:** {p.get('endereco','Não informado')}")
-            with col2:
-                st.subheader("📝 Histórico / Descrição")
-                st.write(p.get('descricao','Sem descrição'))
-                st.write(f"**Responsável:** {p.get('responsavel','–')}")
-                st.write(f"**Tel. Responsável:** {p.get('telefone_responsavel','–')}")
-                st.write(f"**Plano de Saúde:** {p.get('plano_saude','–')}")
-                st.write(f"**Carteirinha:** {p.get('numero_plano','–')}")
-            st.divider()
-
-            # Opções de Atendimento
-            st.subheader("🎥 Opções de Atendimento")
-            c1,c2,c3,c4 = st.columns(4)
-            
-            with c1:
                 st.markdown("### 📱 WhatsApp")
                 if st.button("💬 Enviar link via WhatsApp"):
                     tel=''.join(filter(str.isdigit,p.get('telefone','')))
@@ -574,78 +497,31 @@ if page == "Atender Agora":
                     msg=quote(f"Olá {p['nome']}, acesse sua videochamada: {share_link}")
                     wa_url=f"https://wa.me/55{tel}?text={msg}"
                     st.markdown(f"[Abrir WhatsApp]({wa_url})")
-                
-                # WhatsApp Video direto
                 if st.button("📹 WhatsApp Video"):
                     tel=''.join(filter(str.isdigit,p.get('telefone','')))
                     if tel.startswith('55'): tel=tel[2:]
                     wa_video=f"https://wa.me/55{tel}?text=Iniciar%20videochamada"
                     st.markdown(f"[WhatsApp Video]({wa_video})")
-            
-            with c2:
-                st.markdown("### 🎥 Google Meet")
-                # Gerar link do Google Meet
-                meet_code = f"oria-{p['room_id']}-{datetime.now().strftime('%H%M')}"
-                meet_link = f"https://meet.google.com/{meet_code}"
-                
-                if st.button("🎥 Criar Google Meet"):
-                    st.success(f"✅ Google Meet criado!")
-                    st.markdown(f"**Link do Google Meet:** [{meet_link}]({meet_link})")
-                    
-                    # Enviar link via WhatsApp
-                    tel=''.join(filter(str.isdigit,p.get('telefone','')))
-                    if tel.startswith('55'): tel=tel[2:]
-                    msg=quote(f"Olá {p['nome']}, acesse sua videochamada no Google Meet: {meet_link}")
-                    wa_url=f"https://wa.me/55{tel}?text={msg}"
-                    st.markdown(f"[Enviar link via WhatsApp]({wa_url})")
-            
-            with c3:
-                st.markdown("### 🎥 Zoom")
-                # Gerar link do Zoom
-                zoom_id = f"oria{datetime.now().strftime('%Y%m%d%H%M')}"
-                zoom_link = f"https://zoom.us/j/{zoom_id}"
-                
-                if st.button("🎥 Criar Zoom"):
-                    st.success(f"✅ Zoom criado!")
-                    st.markdown(f"**Link do Zoom:** [{zoom_link}]({zoom_link})")
-                    
-                    # Enviar link via WhatsApp
-                    tel=''.join(filter(str.isdigit,p.get('telefone','')))
-                    if tel.startswith('55'): tel=tel[2:]
-                    msg=quote(f"Olá {p['nome']}, acesse sua videochamada no Zoom: {zoom_link}")
-                    wa_url=f"https://wa.me/55{tel}?text={msg}"
-                    st.markdown(f"[Enviar link via WhatsApp]({wa_url})")
-            
-            with c4:
+            with col2:
                 st.markdown("### 🎥 Jitsi Meet")
-                # Gerar link do Jitsi Meet
                 jitsi_room = f"oria-{p['room_id']}-{datetime.now().strftime('%H%M')}"
                 jitsi_link = f"https://meet.jit.si/{jitsi_room}"
-                
                 if st.button("🎥 Criar Jitsi Meet"):
                     st.success(f"✅ Jitsi Meet criado!")
                     st.markdown(f"**Link do Jitsi Meet:** [{jitsi_link}]({jitsi_link})")
-                    
-                    # Enviar link via WhatsApp
                     tel=''.join(filter(str.isdigit,p.get('telefone','')))
                     if tel.startswith('55'): tel=tel[2:]
                     msg=quote(f"Olá {p['nome']}, acesse sua videochamada no Jitsi Meet: {jitsi_link}")
                     wa_url=f"https://wa.me/55{tel}?text={msg}"
                     st.markdown(f"[Enviar link via WhatsApp]({wa_url})")
-
-            # Observações
-            st.subheader("📝 Observações da Sessão")
-            obs=st.text_area("Digite suas observações:",height=200)
-            if st.button("💾 Salvar Observações"):
-                sessoes.append({
-                    'id':len(sessoes)+1,
-                    'paciente':p['nome'],
-                    'data':datetime.now().strftime("%d/%m/%Y %H:%M"),
-                    'observacoes':obs,
-                    'tipo_atendimento':'online'
-                })
-                salvar_sessoes(sessoes, obter_crp_atual())
-                st.success("Observações salvas com sucesso!")
+            with col3:
+                st.markdown("### 🌐 Link Plataforma")
+                st.markdown(f"**Link direto:** [{share_link}]({share_link})")
+                tel=''.join(filter(str.isdigit,p.get('telefone','')))
+                if tel.startswith('55'): tel=tel[2:]
+                msg=quote(f"Olá {p['nome']}, acesse sua videochamada: {share_link}")
+                wa_url=f"https://wa.me/55{tel}?text={msg}"
+                st.markdown(f"[Enviar link via WhatsApp]({wa_url})")
         else:
             st.info("👆 Selecione um paciente para iniciar.")
 
