@@ -381,6 +381,25 @@ def migrar_dados_existentes(crp):
     except Exception as e:
         st.warning(f"Aviso: Erro na migração de dados: {e}")
 
+def gerar_planilha_modelo():
+    df = pd.DataFrame([
+        {
+            'nome': 'Exemplo Nome',
+            'idade': 30,
+            'telefone': '11999999999',
+            'email': 'exemplo@email.com',
+            'data_nascimento': '01/01/1990',
+            'genero': 'Masculino',
+            'endereco': 'Rua Exemplo, 123',
+            'descricao': 'Histórico do paciente',
+            'responsavel': 'Nome do responsável',
+            'telefone_responsavel': '11988888888',
+            'plano_saude': 'Plano Exemplo',
+            'numero_plano': '123456',
+        }
+    ])
+    return df
+
 def mostrar_info_profissional():
     """Mostra informações sobre o profissional logado e seus dados"""
     crp = obter_crp_atual()
@@ -395,6 +414,38 @@ def mostrar_info_profissional():
             st.metric("📊 Sessões", len(sessoes))
         with col3:
             st.metric("🔐 Profissional", crp)
+        
+        # Upload de planilha Excel para importar pacientes
+        with st.expander("📥 Importar Pacientes via Planilha Excel (.xlsx)"):
+            st.markdown("Faça upload de uma planilha Excel com os campos de cadastro de paciente.")
+            modelo = gerar_planilha_modelo()
+            st.download_button(
+                label="📄 Baixar Planilha Modelo",
+                data=modelo.to_excel(index=False, engine='openpyxl'),
+                file_name="modelo_pacientes.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            uploaded_file = st.file_uploader("Selecione o arquivo Excel (.xlsx)", type=["xlsx"], key="upload_excel")
+            if uploaded_file is not None:
+                try:
+                    df = pd.read_excel(uploaded_file, engine='openpyxl')
+                    # Validação básica dos campos
+                    campos_necessarios = ['nome','idade','telefone','email','data_nascimento','genero','endereco','descricao','responsavel','telefone_responsavel','plano_saude','numero_plano']
+                    if all(c in df.columns for c in campos_necessarios):
+                        novos_pacientes = df.to_dict(orient='records')
+                        # Adiciona room_id e id únicos
+                        for np in novos_pacientes:
+                            np['id'] = len(pacientes) + 1 + novos_pacientes.index(np)
+                            np['room_id'] = uuid.uuid4().hex[:8]
+                            np['data_cadastro'] = datetime.now().strftime("%d/%m/%Y %H:%M")
+                        pacientes.extend(novos_pacientes)
+                        salvar_pacientes(pacientes, crp)
+                        st.success(f"{len(novos_pacientes)} paciente(s) importado(s) com sucesso!")
+                        st.rerun()
+                    else:
+                        st.error("A planilha não possui todos os campos necessários. Baixe o modelo para referência.")
+                except Exception as e:
+                    st.error(f"Erro ao importar planilha: {e}")
         
         # Verificar se há dados para migrar
         if os.path.exists('pacientes.json') or os.path.exists('sessoes.json'):
