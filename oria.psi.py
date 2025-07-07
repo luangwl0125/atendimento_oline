@@ -72,10 +72,10 @@ def salvar_sessoes(sessoes):
         st.error(f"Erro ao salvar sessões: {e}")
 
 # ==== Cabeçalho e estado global ====
-st.title("🧠 OriaPsi 🧠")
+st.title("🧠 OriaPsi - Atendimento On-line 📞")
 page = st.sidebar.selectbox(
     "Escolha uma opção:",
-    ["Atendimento On-line","Gerenciador de Pacientes"]
+    ["Atender Agora","Gerenciar Pacientes"]
 )
 if st.sidebar.button("🔄 Recarregar Dados"):
     st.rerun()
@@ -93,7 +93,6 @@ sessoes = carregar_sessoes()
 
 # ==== Página de Atendimento On-line ====
 if page == "Atendimento On-line":
-    st.header("📞 Atendimento On-line")
     if not pacientes:
         st.warning("⚠️ Nenhum paciente cadastrado. Adicione pelo gerenciador.")
     else:
