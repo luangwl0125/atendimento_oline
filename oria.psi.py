@@ -172,21 +172,6 @@ def pagina_login():
                 senha_registro = st.text_input("Senha", type="password", placeholder="Crie uma senha", key="reg_senha")
                 senha_confirmacao = st.text_input("Confirmar Senha", type="password", placeholder="Confirme sua senha", key="reg_senha_confirm")
                 
-                # Validações
-                if nome_completo and crp_registro and senha_registro and senha_confirmacao:
-                    if not validar_crp(crp_registro):
-                        st.error("❌ CRP inválido! Digite um CRP válido.")
-                    elif verificar_usuario_existe(crp_registro):
-                        st.error("❌ CRP já cadastrado! Use a aba de login.")
-                    elif senha_registro != senha_confirmacao:
-                        st.error("❌ Senhas não coincidem!")
-                    elif len(senha_registro) < 6:
-                        st.error("❌ Senha deve ter pelo menos 6 caracteres!")
-                    elif len(nome_completo) < 3:
-                        st.error("❌ Nome deve ter pelo menos 3 caracteres!")
-                    else:
-                        st.success("✅ Dados válidos! Clique em 'Cadastrar' para continuar.")
-                
                 # Verificar se já foi cadastrado com sucesso
                 cadastro_sucesso = st.session_state.get('cadastro_sucesso', False)
                 
@@ -203,33 +188,39 @@ def pagina_login():
                     3. Clique em **"🔑 Entrar"**
                     4. Comece a usar a plataforma!
                     """)
-                    
-                    # Botão para fazer novo cadastro
                     if st.button("📝 Fazer Novo Cadastro", use_container_width=True):
                         st.session_state.cadastro_sucesso = False
                         st.rerun()
-                                    # Botão de registro
+                else:
                     if st.button("📝 Cadastrar", use_container_width=True):
-                        if nome_completo and crp_registro and senha_registro and senha_confirmacao:
-                            if validar_crp(crp_registro) and not verificar_usuario_existe(crp_registro) and senha_registro == senha_confirmacao and len(senha_registro) >= 6 and len(nome_completo) >= 3:
-                                if registrar_novo_usuario(nome_completo, crp_registro, senha_registro):
-                                    st.session_state.cadastro_sucesso = True
-                                    st.rerun()
-                                else:
-                                    st.error("❌ Erro ao realizar cadastro!")
-                            else:
-                                st.error("❌ Verifique os dados informados!")
-                        else:
+                        # Validações ao clicar no botão
+                        if not (nome_completo and crp_registro and senha_registro and senha_confirmacao):
                             st.error("❌ Preencha todos os campos!")
-                
-                st.markdown("---")
-                st.info("""
-                **📋 Informações do Cadastro:**
-                - CRP deve ter pelo menos 3 caracteres
-                - Senha deve ter pelo menos 6 caracteres
-                - Nome completo é obrigatório
-                - Cada CRP pode ter apenas uma conta
-                """)
+                        elif not validar_crp(crp_registro):
+                            st.error("❌ CRP inválido! Digite um CRP válido.")
+                        elif verificar_usuario_existe(crp_registro):
+                            st.error("❌ CRP já cadastrado! Use a aba de login.")
+                        elif senha_registro != senha_confirmacao:
+                            st.error("❌ Senhas não coincidem!")
+                        elif len(senha_registro) < 6:
+                            st.error("❌ Senha deve ter pelo menos 6 caracteres!")
+                        elif len(nome_completo) < 3:
+                            st.error("❌ Nome deve ter pelo menos 3 caracteres!")
+                        else:
+                            if registrar_novo_usuario(nome_completo, crp_registro, senha_registro):
+                                st.session_state.cadastro_sucesso = True
+                                st.rerun()
+                            else:
+                                st.error("❌ Erro ao realizar cadastro!")
+
+                    st.markdown("---")
+                    st.info("""
+                    **📋 Informações do Cadastro:**
+                    - CRP deve ter pelo menos 3 caracteres
+                    - Senha deve ter pelo menos 6 caracteres
+                    - Nome completo é obrigatório
+                    - Cada CRP pode ter apenas uma conta
+                    """)
     
     # Botão para ver termos (disponível em ambas as abas)
     col1, col2, col3 = st.columns([1, 2, 1])
