@@ -637,7 +637,7 @@ else:
             filtrados=[p for p in pacientes if busca.lower() in p['nome'].lower()] if busca else pacientes
             for i, p in enumerate(filtrados):
                 with st.expander(f"👤 {p['nome']} - {p['idade']} anos"):
-                    col1,col2=st.columns(2)
+                    col1, col2 = st.columns(2)
                     with col1:
                         st.write(f"📱 {p.get('telefone','–')}")
                         st.write(f"✉️ {p.get('email','–')}")
@@ -645,11 +645,60 @@ else:
                     with col2:
                         st.write(f"🏠 {p.get('endereco','–')}")
                         st.write(f"👤 {p.get('responsavel','–')}")
-                    if st.button("🗑️ Excluir",key=f"del_{p['id']}_{i}"):
-                        pacientes.remove(p)
-                        salvar_pacientes(pacientes, obter_crp_atual())
-                        st.success("Paciente removido!")
-                        st.rerun()
+                    col_btn1, col_btn2 = st.columns([1,1])
+                    with col_btn1:
+                        if st.button("🗑️ Excluir", key=f"del_{p['id']}_{i}"):
+                            pacientes.remove(p)
+                            salvar_pacientes(pacientes, obter_crp_atual())
+                            st.success("Paciente removido!")
+                            st.rerun()
+                    with col_btn2:
+                        if st.button("✏️ Editar", key=f"edit_{p['id']}_{i}"):
+                            st.session_state['edit_paciente'] = p['id']
+                            st.session_state['edit_index'] = i
+                            st.session_state['edit_data'] = p.copy()
+                            st.rerun()
+
+                # Formulário de edição inline
+                if st.session_state.get('edit_paciente') == p['id'] and st.session_state.get('edit_index') == i:
+                    edit_data = st.session_state.get('edit_data', p.copy())
+                    with st.form(f"form_edit_{p['id']}_{i}"):
+                        nome_edit = st.text_input("Nome Completo", value=edit_data.get('nome',''))
+                        idade_edit = st.number_input("Idade", min_value=0, max_value=120, value=edit_data.get('idade',0))
+                        telefone_edit = st.text_input("Telefone", value=edit_data.get('telefone',''))
+                        email_edit = st.text_input("E-mail", value=edit_data.get('email',''))
+                        data_nasc_edit = st.text_input("Data de Nascimento", value=edit_data.get('data_nascimento',''))
+                        endereco_edit = st.text_input("Endereço", value=edit_data.get('endereco',''))
+                        descricao_edit = st.text_area("Descrição / Histórico", value=edit_data.get('descricao',''))
+                        responsavel_edit = st.text_input("Responsável", value=edit_data.get('responsavel',''))
+                        telefone_resp_edit = st.text_input("Telefone do Responsável", value=edit_data.get('telefone_responsavel',''))
+                        plano_saude_edit = st.text_input("Plano de Saúde", value=edit_data.get('plano_saude',''))
+                        numero_plano_edit = st.text_input("Número da Carteirinha", value=edit_data.get('numero_plano',''))
+                        submitted = st.form_submit_button("💾 Salvar Alterações")
+                        cancelar = st.form_submit_button("Cancelar")
+                        if submitted:
+                            p['nome'] = nome_edit
+                            p['idade'] = idade_edit
+                            p['telefone'] = telefone_edit
+                            p['email'] = email_edit
+                            p['data_nascimento'] = data_nasc_edit
+                            p['endereco'] = endereco_edit
+                            p['descricao'] = descricao_edit
+                            p['responsavel'] = responsavel_edit
+                            p['telefone_responsavel'] = telefone_resp_edit
+                            p['plano_saude'] = plano_saude_edit
+                            p['numero_plano'] = numero_plano_edit
+                            salvar_pacientes(pacientes, obter_crp_atual())
+                            st.success("Alterações salvas!")
+                            del st.session_state['edit_paciente']
+                            del st.session_state['edit_index']
+                            del st.session_state['edit_data']
+                            st.rerun()
+                        if cancelar:
+                            del st.session_state['edit_paciente']
+                            del st.session_state['edit_index']
+                            del st.session_state['edit_data']
+                            st.rerun()
     with tab3:
         st.subheader("Histórico de Sessões")
         for s in reversed(sessoes):
