@@ -91,10 +91,10 @@ if updated:
     salvar_pacientes(pacientes)
 sessoes = carregar_sessoes()
 
-# ==== Página de Atendimento On-line ====
-if page == "Atendimento On-line":
+# ==== Página de Atender Agora ====
+if page == "Atender Agora":
     if not pacientes:
-        st.warning("⚠️ Nenhum paciente cadastrado. Adicione pelo gerenciador.")
+        st.warning("⚠️ Nenhum paciente cadastrado. Adicione pelo Gerenciar Pacientes.")
     else:
         st.success(f"✅ {len(pacientes)} paciente(s) cadastrado(s)")
         nomes = [p['nome'] for p in pacientes]
@@ -250,9 +250,9 @@ if page == "Atendimento On-line":
         else:
             st.info("👆 Selecione um paciente para iniciar.")
 
-# ==== Gerenciador de Pacientes ====
+# ==== Gerenciar Pacientes ====
 else:
-    st.header("👥 Gerenciador de Pacientes")
+    st.header("👥 Gerenciar Pacientes")
     tab1,tab2,tab3=st.tabs(["➕ Adicionar","📋 Lista","📊 Histórico"])
     with tab1:
         st.subheader("Adicionar Novo Paciente")
