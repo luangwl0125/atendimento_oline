@@ -72,7 +72,7 @@ def salvar_sessoes(sessoes):
         st.error(f"Erro ao salvar sessões: {e}")
 
 # ==== Cabeçalho e estado global ====
-st.title("🧠 Plataforma de Psicologia")
+st.title("🧠 OriaPsi 🧠")
 page = st.sidebar.selectbox(
     "Escolha uma opção:",
     ["Atendimento On-line","Gerenciador de Pacientes"]
