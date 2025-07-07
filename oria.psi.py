@@ -488,7 +488,7 @@ if page == "Atender Agora":
                 - **Jitsi Meet** é ideal para privacidade e simplicidade
                 - **WhatsApp Video** é ideal para atendimentos rápidos
                 """)
-            col1, col2, col3 = st.columns(3)
+            col1, col2 = st.columns(2)
             with col1:
                 st.markdown("### 📱 WhatsApp")
                 if st.button("💬 Enviar link via WhatsApp"):
@@ -514,14 +514,6 @@ if page == "Atender Agora":
                     msg=quote(f"Olá {p['nome']}, acesse sua videochamada no Jitsi Meet: {jitsi_link}")
                     wa_url=f"https://wa.me/55{tel}?text={msg}"
                     st.markdown(f"[Enviar link via WhatsApp]({wa_url})")
-            with col3:
-                st.markdown("### 🌐 Link Plataforma")
-                st.markdown(f"**Link direto:** [{share_link}]({share_link})")
-                tel=''.join(filter(str.isdigit,p.get('telefone','')))
-                if tel.startswith('55'): tel=tel[2:]
-                msg=quote(f"Olá {p['nome']}, acesse sua videochamada: {share_link}")
-                wa_url=f"https://wa.me/55{tel}?text={msg}"
-                st.markdown(f"[Enviar link via WhatsApp]({wa_url})")
         else:
             st.info("👆 Selecione um paciente para iniciar.")
 
