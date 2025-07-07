@@ -76,10 +76,9 @@ def salvar_usuarios(usuarios):
 
 def validar_crp(crp):
     """Valida formato do CRP"""
-    import re
-    # Formato: XX/XXXXXX (2 dígitos, barra, 6 dígitos)
-    pattern = r'^\d{2}/\d{6}$'
-    return bool(re.match(pattern, crp))
+    # Removida validação de formato específico
+    # Aceita qualquer formato de CRP
+    return len(crp.strip()) >= 3  # Mínimo 3 caracteres
 
 def verificar_usuario_existe(crp):
     """Verifica se usuário já existe"""
@@ -129,7 +128,7 @@ def pagina_login():
                 st.markdown("### 🔐 Login Profissional")
                 
                 # Campos de login
-                crp_login = st.text_input("CRP (Ex: 06/123456)", placeholder="06/123456", key="login_crp")
+                crp_login = st.text_input("CRP", placeholder="Digite seu CRP", key="login_crp")
                 senha_login = st.text_input("Senha", type="password", placeholder="Digite sua senha", key="login_senha")
                 
                 # Botão de login
@@ -145,7 +144,7 @@ def pagina_login():
                             else:
                                 st.error("❌ CRP ou senha incorretos!")
                         else:
-                            st.error("❌ Formato de CRP inválido! Use: XX/XXXXXX")
+                            st.error("❌ CRP inválido! Digite um CRP válido.")
                     else:
                         st.error("❌ Preencha todos os campos!")
                 
@@ -169,14 +168,14 @@ def pagina_login():
                 
                 # Campos de registro
                 nome_completo = st.text_input("Nome Completo", placeholder="Digite seu nome completo", key="reg_nome")
-                crp_registro = st.text_input("CRP (Ex: 06/123456)", placeholder="06/123456", key="reg_crp")
+                crp_registro = st.text_input("CRP", placeholder="Digite seu CRP", key="reg_crp")
                 senha_registro = st.text_input("Senha", type="password", placeholder="Crie uma senha", key="reg_senha")
                 senha_confirmacao = st.text_input("Confirmar Senha", type="password", placeholder="Confirme sua senha", key="reg_senha_confirm")
                 
                 # Validações
                 if nome_completo and crp_registro and senha_registro and senha_confirmacao:
                     if not validar_crp(crp_registro):
-                        st.error("❌ Formato de CRP inválido! Use: XX/XXXXXX")
+                        st.error("❌ CRP inválido! Digite um CRP válido.")
                     elif verificar_usuario_existe(crp_registro):
                         st.error("❌ CRP já cadastrado! Use a aba de login.")
                     elif senha_registro != senha_confirmacao:
@@ -211,7 +210,7 @@ def pagina_login():
                 st.markdown("---")
                 st.info("""
                 **📋 Informações do Cadastro:**
-                - CRP deve estar no formato XX/XXXXXX
+                - CRP deve ter pelo menos 3 caracteres
                 - Senha deve ter pelo menos 6 caracteres
                 - Nome completo é obrigatório
                 - Cada CRP pode ter apenas uma conta
