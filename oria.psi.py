@@ -70,8 +70,9 @@ def carregar_usuarios():
 def salvar_usuarios(usuarios):
     """Salva lista de usuários"""
     try:
-        with open('usuarios.json','w',encoding='utf-8') as f:
-            json.dump(usuarios,f,ensure_ascii=False,indent=2)
+        caminho = os.path.join(os.getcwd(), 'usuarios.json')
+        with open(caminho, 'w', encoding='utf-8') as f:
+            json.dump(usuarios, f, ensure_ascii=False, indent=2)
     except Exception as e:
         st.error(f"Erro ao salvar usuários: {e}")
 
@@ -317,9 +318,9 @@ def salvar_pacientes(pacientes, crp=None):
         else:
             # Arquivo geral (fallback)
             arquivo = 'pacientes.json'
-            
-        with open(arquivo,'w',encoding='utf-8') as f:
-            json.dump(pacientes,f,ensure_ascii=False,indent=2)
+        caminho = os.path.join(os.getcwd(), arquivo)
+        with open(caminho, 'w', encoding='utf-8') as f:
+            json.dump(pacientes, f, ensure_ascii=False, indent=2)
     except Exception as e:
         st.error(f"Erro ao salvar pacientes: {e}")
 
